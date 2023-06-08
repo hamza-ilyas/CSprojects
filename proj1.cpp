@@ -1,0 +1,350 @@
+/*********************************************
+** File: proj1.cpp
+** Project: CMSC 202 Project 1, Spring 2019
+** Author: Hamza Ilyas
+** Date: 02/12/2019
+** Section: 7
+** E-mail: hamza3@umbc.edu
+**
+** This program will take in different files of characters 
+** and coordinates to display or manipulate ASCII art 
+** based on user request.
+**
+**
+*********************************************/
+
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <cmath>
+#include <cstdlib>
+using namespace std;
+
+
+const int    X_DIMEN = 75; // the x(length) of the array
+const int    Y_DIMEN = 75; // the y(height) of the array
+const int    MAX_ELEMENTS = 5625; // the maximum elements possible in the array,
+                                  //derived from 75 * 75
+const int    DIMEN = 75; //general dimension constant
+
+//function prototypes below
+int mainMenu(char asciiArtArray[X_DIMEN][Y_DIMEN] ,int choice);
+int loadArt(char asciiArtArray[X_DIMEN][Y_DIMEN]);
+int createManual(char asciiArtArray[X_DIMEN][Y_DIMEN]);
+void displayArt(char asciiArtArray[X_DIMEN][Y_DIMEN]);
+int validateInput(int lowerBound, int upperBound);
+void rotateArt(char asciiArtArray[X_DIMEN][Y_DIMEN]);
+
+
+
+int main()
+
+{
+
+  cout << "\nWelcome to the ASCII art tool!\n" << endl;  char asciiArtArray[X_DIMEN][Y_DIMEN] = {' '}; int option = 0; option = mainMenu(asciiArtArray, option);if(option = 6) /*only 6 will return to main and end the program. */cout << "\nThank you for using the program!\n" << endl;
+  
+  return 0;
+
+  //main is implemented such so it will be a very minor chunk of code
+  //the main work of invoking functions will be done by the mainMenu() function.
+}
+
+
+
+
+
+//-------------------------------------------------------
+// Name: mainmenu
+// PreCondition: none
+// PostCondition: returns 6 to main when the user wants to terminate program
+//---------------------------------------------------------
+
+
+int mainMenu(char asciiArtArray[X_DIMEN][Y_DIMEN], int choice)
+
+{
+
+  cout << "What would you like to do?" << endl;
+  cout << "1. Load ASCII Art from File" << endl;
+  cout << "2. Create ASCII Art Manually" << endl;
+  cout << "3. Display Art" << endl;
+  cout << "4. Rotate Art" << endl;
+  cout << "5. Invert Art" << endl;
+  cout << "6. Exit" << endl;
+
+  
+  cin >> choice;
+  while ((choice < 1) or (choice > 6 ))
+    mainMenu(asciiArtArray, choice); // if the user makes a wrong choice,
+                      // the function invokes again, displaying
+                      // menu options and asking for new input
+
+  //this above statement can't be implemented with the function validateInput
+  //since we need the check to happen here so if a repeat call is necessary, it happens.
+
+
+  
+  switch (choice)
+    {
+    case 1:
+
+      loadArt(asciiArtArray);
+      //a specific case will call a specific function.
+      choice = 0; //after that function executes, choice will go back to 0.
+      mainMenu(asciiArtArray, choice); //the user will be able to select another menu option.
+      break;            //all the cases follow the same structure. 
+
+    case 2:
+      createManual(asciiArtArray);
+      choice = 0;
+      mainMenu(asciiArtArray, choice);
+      break;
+
+    case 3:
+      displayArt(asciiArtArray);
+      choice = 0;
+      mainMenu(asciiArtArray, choice);
+      break;
+
+    case 4:
+      rotateArt(asciiArtArray);
+      choice = 0;
+      mainMenu(asciiArtArray, choice);
+      break;
+
+    case 5: //since rotating twice is same as one inversion,
+      //a second function for inversion was not necessary. 
+      rotateArt(asciiArtArray);
+      rotateArt(asciiArtArray);
+      choice = 0;
+      mainMenu(asciiArtArray, choice);
+      break;
+
+    case 6:
+      return 6; //if 6 is returned to main, the program is finished.
+    }
+
+
+
+
+
+  
+  return choice;
+    
+}
+
+
+
+
+
+
+
+//-------------------------------------------------------
+// Name: loadArt
+// PreCondition: none
+// PostCondition: returns nothing since arrays are pointers
+//---------------------------------------------------------                                                            
+int loadArt(char asciiArtArray[X_DIMEN][Y_DIMEN])
+
+{
+
+  cout << "What is the name of the data file to import? " << endl;
+  char fileName[80]; //num as seen on powerpoint slides in class
+  ifstream inputStream;
+  cin >> fileName;
+
+  inputStream.open(fileName);
+  
+  int x; //this will represent x coordinates from file
+  int y; //this will represent y coordinates from file
+  
+  char symbol; //this variable will store the symbol from file
+  
+  int floodX = 0; //will be used to fill array with spaces
+  int floodY = 0; //^^
+
+  
+  for  (floodX; floodX < X_DIMEN; floodX++)
+      {  for (floodY; floodY < Y_DIMEN; floodY++) //nested for loop implementation to fill array with spaces
+	  {  asciiArtArray[floodX][floodY] = ' ';
+	      }
+      floodY = 0; //y must go back to 0 to flood values in mainArray[1]
+      }
+  
+
+  
+  int i = 0;
+  for (i; i < MAX_ELEMENTS; i++)
+    {
+    inputStream >> x;
+    //    cout << x;
+    inputStream >> y;
+    //cout << y;
+    inputStream >> symbol;
+    //cout << symbol << endl;
+    asciiArtArray[x][y] = symbol;
+    }
+
+  //the array gets flooded by the input
+  //the file then closes
+
+   inputStream.close();
+
+   cout << "Done\n";
+
+     return 0;
+
+  
+}
+
+
+
+
+
+//-------------------------------------------------------                                                             
+// Name: createManual                                                                                                
+// PreCondition: must take through x, y, and symbol (not as parameters) to mend array                                
+// PostCondition: returns 6 to main when the user wants to terminate program                                          
+//---------------------------------------------------------                                                            
+int createManual(char asciiArtArray[X_DIMEN][Y_DIMEN])
+
+{
+
+  cout << "This will modify the current art" << endl;
+
+  cout << "Enter the x coordinate between 0 and 75: " << endl;
+  int xCord = validateInput(0, X_DIMEN);
+
+  cout << "Enter the y coordinate between 0 and 75: " << endl; 
+  int yCord = validateInput(0, Y_DIMEN);
+
+  cout << "Enter the character for that location: " << endl;
+  char symbol;
+  cin >> symbol;
+
+  //the user enters the coordinate and symbol, and that
+  //chosen coordinate is made to be that chosen symbol
+  
+  asciiArtArray[xCord][yCord] = symbol;
+
+  return 0;
+
+}
+
+
+
+
+
+
+//-------------------------------------------------------                                                            
+// Name: mainmenu                                                                                                    
+// PreCondition: void function, none needed                                                                           
+// PostCondition: displays the art
+//---------------------------------------------------------                                                            
+
+
+void displayArt(char asciiArtArray[X_DIMEN][Y_DIMEN])
+
+{
+  //simple nested while loop to display 2d array
+  cout << "Below is the art displayed: \n" <<  endl;
+  int k = 0;  int j = 0;for (k; k < X_DIMEN; k++) {for (j; j < Y_DIMEN; j++) {cout << asciiArtArray[k][j];}cout << endl;j=0;
+  }
+
+}
+
+
+
+
+
+
+//-------------------------------------------------------                                                             
+// Name: rotateArt()                                                                                                  
+// PreCondition: none                                                                                                 
+// PostCondition: none needed as arrays are pointers
+//---------------------------------------------------------                                                            
+
+
+void rotateArt(char asciiArtArray[X_DIMEN][Y_DIMEN])
+
+{
+
+  char tempArray[X_DIMEN][Y_DIMEN] = {' '};
+  //new array to be copied
+  int i = 0;
+  int j = 0;
+  //variables initialized for the loops
+  int floodX = 0;
+  int floodY = 0;
+
+  //making a blank temp array
+  for  (floodX; floodX < X_DIMEN; floodX++)
+      {
+       for (floodY; floodY < Y_DIMEN; floodY++) //nested for loop implementation to fill array with spaces
+	  
+          {  tempArray[floodX][floodY] = ' ';
+              }
+      floodY = 0; //y must go back to 0 to flood values in mainArray[1]
+      }
+
+  i = 0;
+  j = 0;
+
+
+  
+  //making the blank temp array = the current art rotated
+  for(i;  i < X_DIMEN; ++i)
+    {
+      for(j = Y_DIMEN-1; j >= 0;  j--) {
+	tempArray[i][j] = asciiArtArray[j][i];
+      }
+    }
+
+
+  floodX = 0;
+  floodY = 0;
+
+  //emptying the imported array
+  for  (floodX; floodX < X_DIMEN; floodX++)
+      {
+       for (floodY; floodY < Y_DIMEN; floodY++) //nested for loop implementation to fill array with spaces            
+          {  asciiArtArray[floodX][floodY] = ' ';
+              }
+      floodY = 0; //y must go back to 0 to flood values in mainArray[1]                                               
+      }
+
+
+  i = 0;
+  j = 0;
+  //making the imported array = the temp array
+  for(i;  i < X_DIMEN; i++)
+    {
+      for(j; j < Y_DIMEN; j++) {
+        asciiArtArray[i][j] = tempArray[i][j];
+      }
+      j=0;
+    }
+}
+
+
+
+
+//-------------------------------------------------------                                                            
+// Name: validateInput                                                                                               
+// PreCondition: must take in 2 integers
+// PostCondition: returns an integer in the specified boundary
+//---------------------------------------------------------                                                           
+
+int validateInput(int lowerBound, int UpperBound)
+
+{
+  //simple do-while structure to validate input
+  int toReturn;
+  do {
+    cin >> toReturn;
+  }
+  while ((toReturn < 0) or (toReturn > DIMEN));
+
+    return toReturn;
+
+}
